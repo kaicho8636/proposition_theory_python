@@ -27,5 +27,3 @@ def or_associative(hpqr: (P | Q) | R) -> P | (Q | R):  # (P ∨ Q) ∨ R → P �
 
 def and_associative(hpqr: Tuple[Tuple[P, Q], R]) -> Tuple[P, Tuple[Q, R]]:  # (P ∧ Q) ∧ R → P ∧ (Q ∧ R)
     return hpqr[0][0], (hpqr[0][1], hpqr[1])
-
-
