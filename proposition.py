@@ -46,22 +46,6 @@ class And(Generic[S, T]):
         return cls(left, right)
 
 
-class Implies(Generic[S, T]):
-    def __init__(self, mapping: Callable[[S], T]):
-        self.mapping = mapping
-
-    def apply(self, domain: S) -> T:
-        return self.mapping(domain)
-
-
-class Bottom:
-    pass
-
-
-class Not(Generic[S], Implies[S, Bottom]):
-    pass
-
-
 class P:
     pass
 
@@ -104,5 +88,8 @@ def or_associative(hpqr: Or[Or[P, Q], R]) -> Or[P, Or[Q, R]]:  # (P ∨ Q) ∨ R
 def and_associative(hpqr: And[And[P, Q], R]) -> And[P, And[Q, R]]: # (P ∧ Q) ∧ R → P ∧ (Q ∧ R)
     return And(
         hpqr.left.left,
-        And(hpqr.left.right, hpqr.right)
+        And(
+            hpqr.left.right,
+            hpqr.right
+        )
     )
