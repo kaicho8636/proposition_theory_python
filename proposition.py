@@ -41,6 +41,10 @@ class And(Generic[S, T]):
         self.left = left
         self.right = right
 
+    @classmethod
+    def intro(cls, left: S, right: T):
+        return cls(left, right)
+
 
 class Implies(Generic[S, T]):
     def __init__(self, mapping: Callable[[S], T]):
