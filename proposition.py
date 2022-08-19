@@ -11,14 +11,6 @@ class Or(Generic[S, T], metaclass=ABCMeta):
     def eliminate(self, left_case: Callable[[S], U], right_case: Callable[[T], U]) -> U:
         ...
 
-    @classmethod
-    def intro_left(cls, left: S):
-        return Left(left)
-
-    @classmethod
-    def intro_right(cls, right: T):
-        return Right(right)
-
 
 class Left(Or[S, T]):
     def __init__(self, left: S):
@@ -40,10 +32,6 @@ class And(Generic[S, T]):
     def __init__(self, left: S, right: T):
         self.left = left
         self.right = right
-
-    @classmethod
-    def intro(cls, left: S, right: T):
-        return cls(left, right)
 
 
 class P:
