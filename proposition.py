@@ -42,6 +42,10 @@ class Implies(Generic[S, T]):
         return self.mapping(domain)
 
 
+class Bottom:
+    pass
+
+
 class P:
     pass
 
@@ -149,6 +153,22 @@ def destruct_or(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]
 
 
 def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
+    return Implies(
+        lambda hpq: hpq.eliminate(
+            lambda hp: hprqr.left.apply(hp),
+            lambda hq: hprqr.right.apply(hq)
+        )
+    )
+
+
+def de_morgan_1a(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]:
+    return And(
+        Implies(lambda hp: hpqr.apply(Left(hp))),
+        Implies(lambda hq: hpqr.apply(Right(hq)))
+    )
+
+
+def de_morgan_1b(hprqr: And[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[Or[P, Q], Bottom]:
     return Implies(
         lambda hpq: hpq.eliminate(
             lambda hp: hprqr.left.apply(hp),
