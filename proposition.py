@@ -73,7 +73,7 @@ def or_associative(hpqr: Or[Or[P, Q], R]) -> Or[P, Or[Q, R]]:  # (P ∨ Q) ∨ R
     )
 
 
-def and_associative(hpqr: And[And[P, Q], R]) -> And[P, And[Q, R]]: # (P ∧ Q) ∧ R → P ∧ (Q ∧ R)
+def and_associative(hpqr: And[And[P, Q], R]) -> And[P, And[Q, R]]:  # (P ∧ Q) ∧ R → P ∧ (Q ∧ R)
     return And(
         hpqr.left.left,
         And(
@@ -81,3 +81,18 @@ def and_associative(hpqr: And[And[P, Q], R]) -> And[P, And[Q, R]]: # (P ∧ Q) �
             hpqr.right
         )
     )
+
+
+def and_distributive_a(hpqr: And[P, Or[Q, R]]) ->  Or[And[P, Q], And[P, R]]:  # p ∧ (q ∨ r) → (p ∧ q) ∨ (p ∧ r)
+    return hpqr.right.eliminate(
+        lambda hq: Left(And(hpqr.left, hq)),
+        lambda hr: Right(And(hpqr.left, hr))
+    )
+
+
+def and_distributive_b(hpqpr: Or[And[P, Q], And[P, R]]) -> And[P, Or[Q, R]]:  # p ∧ (q ∨ r) → (p ∧ q) ∨ (p ∧ r)
+    return hpqpr.eliminate(
+        lambda hpq: And(hpq.left, Left(hpq.right)),
+        lambda hpr: And(hpr.left, Right(hpr.right))
+    )
+
