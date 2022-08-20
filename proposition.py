@@ -125,7 +125,7 @@ def or_distributive_b(hpqpr: And[Or[P, Q], Or[P, R]]) -> Or[P, And[Q, R]]:  # (p
     )
 
 
-def unify_assumptions(hpqr: Implies[P, Implies[Q, R]]) -> Implies[And[P, Q], R]: # (p → (q → r)) → (p ∧ q → r)
+def unify_and(hpqr: Implies[P, Implies[Q, R]]) -> Implies[And[P, Q], R]: # (p → (q → r)) → (p ∧ q → r)
     return Implies(
         lambda hpq: hpqr
         .apply(hpq.left)
@@ -133,10 +133,25 @@ def unify_assumptions(hpqr: Implies[P, Implies[Q, R]]) -> Implies[And[P, Q], R]:
         )
 
 
-def destruct_assumption(hpqr: Implies[And[P, Q], R]) -> Implies[P, Implies[Q, R]]: # (p ∧ q → r) → (p → (q → r))
+def destruct_and(hpqr: Implies[And[P, Q], R]) -> Implies[P, Implies[Q, R]]: # (p ∧ q → r) → (p → (q → r))
     return Implies(
         lambda hp: Implies(
-            lambda hq: hpqr
-            .apply(And(hp, hq))
+            lambda hq: hpqr.apply(And(hp, hq))
+        )
+    )
+
+
+def destruct_or(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]:
+    return And(
+        Implies(lambda hp: hpqr.apply(Left(hp))),
+        Implies(lambda hq: hpqr.apply(Right(hq)))
+    )
+
+
+def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
+    return Implies(
+        lambda hpq: hpq.eliminate(
+            lambda hp: hprqr.left.apply(hp),
+            lambda hq: hprqr.right.apply(hq)
         )
     )
