@@ -26,7 +26,7 @@ class Cons(Nat, Generic[N]):
     self.prev = prev
 
 
-def h0(assumption: Refl[Cons[M], N]) -> Refl[Cons[Cons[M]], Cons[N]]: # S+1=T → S+2=T+1
+def h0(assumption: Refl[Cons[M], N]) -> Refl[Cons[Cons[M]], Cons[N]]: # m+1=n → m+2=n+1
   return Refl(
     Cons(assumption.left),
     Cons(assumption.right)
