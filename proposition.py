@@ -34,6 +34,14 @@ class And(Generic[S, T]):
         self.right = right
 
 
+class Implies(Generic[S, T]):
+    def __init__(self, mapping: Callable[[S], T]):
+        self.mapping = mapping
+    
+    def apply(self, domain: S) -> T:
+        return self.mapping(domain)
+
+
 class P:
     pass
 
@@ -113,5 +121,22 @@ def or_distributive_b(hpqpr: And[Or[P, Q], Or[P, R]]) -> Or[P, And[Q, R]]:  # (p
         lambda hq: hpqpr.right.eliminate(
             lambda hp: Left(hp),
             lambda hr: Right(And(hq, hr))
+        )
+    )
+
+
+def unify_assumptions(hpqr: Implies[P, Implies[Q, R]]) -> Implies[And[P, Q], R]: # (p → (q → r)) → (p ∧ q → r)
+    return Implies(
+        lambda hpq: hpqr
+        .apply(hpq.left)
+        .apply(hpq.right)
+        )
+
+
+def destruct_assumption(hpqr: Implies[And[P, Q], R]) -> Implies[P, Implies[Q, R]]: # (p ∧ q → r) → (p → (q → r))
+    return Implies(
+        lambda hp: Implies(
+            lambda hq: hpqr
+            .apply(And(hp, hq))
         )
     )
