@@ -90,9 +90,28 @@ def and_distributive_a(hpqr: And[P, Or[Q, R]]) ->  Or[And[P, Q], And[P, R]]:  # 
     )
 
 
-def and_distributive_b(hpqpr: Or[And[P, Q], And[P, R]]) -> And[P, Or[Q, R]]:  # p ∧ (q ∨ r) → (p ∧ q) ∨ (p ∧ r)
+def and_distributive_b(hpqpr: Or[And[P, Q], And[P, R]]) -> And[P, Or[Q, R]]:  # (p ∧ q) ∨ (p ∧ r) → p ∧ (q ∨ r)
     return hpqpr.eliminate(
         lambda hpq: And(hpq.left, Left(hpq.right)),
         lambda hpr: And(hpr.left, Right(hpr.right))
     )
 
+
+def or_distributive_a(hpqr: Or[P, And[Q, R]]) -> And[Or[P, Q], Or[P, R]]:  # p ∨ (q ∧ r) → (p ∨ q) ∧ (p ∨ r)
+    return hpqr.eliminate(
+        lambda hp: And(Left(hp), Left(hp)),
+        lambda hqr: And(Right(hqr.left), Right(hqr.right))
+    )
+
+
+def or_distributive_b(hpqpr: And[Or[P, Q], Or[P, R]]) -> Or[P, And[Q, R]]:  # (p ∨ q) ∧ (p ∨ r) → p ∨ (q ∧ r)
+    def derive_pqr(hp: P) -> Or[P, And[Q, R]]:
+        return Left(hp)
+    
+    return hpqpr.left.eliminate(
+        lambda hp: derive_pqr(hp),
+        lambda hq: hpqpr.right.eliminate(
+            lambda hp: Left(hp),
+            lambda hr: Right(And(hq, hr))
+        )
+    )
