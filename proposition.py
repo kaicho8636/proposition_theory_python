@@ -109,13 +109,7 @@ def or_associative(hpqr: Or[Or[P, Q], R]) -> Or[P, Or[Q, R]]:
 
 # (P ∧ Q) ∧ R → P ∧ (Q ∧ R)
 def and_associative(hpqr: And[And[P, Q], R]) -> And[P, And[Q, R]]:
-    return And(
-        hpqr.left.left,
-        And(
-            hpqr.left.right,
-            hpqr.right
-        )
-    )
+    return And(hpqr.left.left, And(hpqr.left.right, hpqr.right))
 
 
 # P ∧ (Q ∨ R) → (P ∧ Q) ∨ (P ∧ R)
@@ -158,18 +152,16 @@ def or_distributive_b(hpqpr: And[Or[P, Q], Or[P, R]]) -> Or[P, And[Q, R]]:
 
 # (P → (Q → R)) → (P ∧ Q → R)
 def unify_and(hpqr: Implies[P, Implies[Q, R]]) -> Implies[And[P, Q], R]:
-    return Implies(
-        lambda hpq: hpqr
-        .apply(hpq.left)
-        .apply(hpq.right)
-        )
+    return Implies(lambda hpq:
+        hpqr.apply(hpq.left).apply(hpq.right)
+    )
 
 
 # (P ∧ Q → R) → (P → (Q → R))
 def destruct_and(hpqr: Implies[And[P, Q], R]) -> Implies[P, Implies[Q, R]]:
-    return Implies(
-        lambda hp: Implies(
-            lambda hq: hpqr.apply(And(hp, hq))
+    return Implies(lambda hp:
+        Implies(lambda hq:
+            hpqr.apply(And(hp, hq))
         )
     )
 
@@ -184,8 +176,8 @@ def destruct_or(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]
 
 # (P → R) ∧ (Q → R) → (P ∨ Q → R)
 def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
-    return Implies(
-        lambda hpq: hpq.eliminate(
+    return Implies(lambda hpq:
+        hpq.eliminate(
             lambda hp: hprqr.left.apply(hp),
             lambda hq: hprqr.right.apply(hq)
         )
@@ -202,8 +194,8 @@ def de_morgan_1a(hnpq: Implies[Or[P, Q], Bottom]) -> And[Implies[P, Bottom], Imp
 
 # ¬P ∧ ¬Q → ¬(P ∨ Q)
 def de_morgan_1b(hnpnq: And[Not[P], Not[Q]]) -> Not[Or[P, Q]]:
-    return Not(
-        lambda hpq: hpq.eliminate(
+    return Not(lambda hpq:
+        hpq.eliminate(
             lambda hp: hnpnq.left.apply(hp),
             lambda hq: hnpnq.right.apply(hq)
         )
@@ -219,28 +211,31 @@ def de_morgan_2(hnpnq: Or[Not[P], Not[Q]]) -> Not[And[P, Q]]:
 
 
 # ¬(P ∧ ¬P)
-not_contradiction: Not[And[P, Not[P]]] = Not(
-    lambda hpnp: hpnp.right.apply(hpnp.left)
-)
+def not_pos_and_neg()-> Not[And[P, Not[P]]]:
+    return Not(lambda hpnp:
+        hpnp.right.apply(hpnp.left)
+    )
 
 
 # P ∧ ¬Q → ¬(P → Q)
 def derive_neg_impl(hpnq: And[P, Not[Q]]) -> Not[Implies[P, Q]]:
-    return Not(
-        lambda hpq: hpnq.right.apply(
-            hpq.apply(hpnq.left)
-        )
+    return Not(lambda hpq:
+        hpnq.right.apply(hpq.apply(hpnq.left))
     )
 
 
 # ¬P → (P → Q)
 def elim_bottom(hnp: Not[P]) -> Implies[P, Q]:
-    return Implies(lambda hp: hnp.apply(hp).eliminate())
+    return Implies(lambda hp:
+        hnp.apply(hp).eliminate()
+    )
 
 
 # ¬P ∧ Q → (P → Q)
 def derive_impl(hnpq: And[Not[P], Q]) -> Implies[P, Q]:
-    return Implies(lambda hp: hnpq.left.apply(hp).eliminate())
+    return Implies(lambda hp:
+        hnpq.left.apply(hp).eliminate()
+    )
 
 
 # P ∨ ⊥ → P
@@ -258,27 +253,22 @@ def add_assumption_to_bottom(bottom: Bottom) -> And[P, Bottom]:
 
 # ¬(P ↔︎ ¬P)
 def not_pos_iff_neg() -> Not[Iff[P, Not[P]]]:
-    return Not(
-        lambda hpnp: hpnp.forward
-        .apply(hpnp.backward
-            .apply(Not(lambda hp: hpnp.forward
-                .apply(hp)
-                .apply(hp)
-            ))
+    def derive_p(hpnp: Iff[P, Not[P]]) -> P:
+        return hpnp.backward.apply(
+            Not(lambda hp:
+                hpnp.forward.apply(hp).apply(hp)
+            )
         )
-        .apply(hpnp.backward
-            .apply(Not(lambda hp: hpnp.forward
-                .apply(hp)
-                .apply(hp)
-            ))
-        )
+    
+    return Not(lambda hpnp:
+        hpnp.forward.apply(derive_p(hpnp)).apply(derive_p(hpnp))
     )
 
 
 # (P → Q) → (¬Q → ¬P)
 def contraposition(hpq: Implies[P, Q]) -> Implies[Not[Q], Not[P]]:
-    return Implies(
-        lambda hnq: Not(
-            lambda hp: hnq.apply(hpq.apply(hp))
+    return Implies(lambda hnq:
+        Not(lambda hp:
+            hnq.apply(hpq.apply(hp))
         )
     )
