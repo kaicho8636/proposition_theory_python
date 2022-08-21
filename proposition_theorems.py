@@ -123,10 +123,10 @@ def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
 
 
 # ¬(P ∨ Q) → ¬P ∧ ¬Q
-def de_morgan_1a(hnpq: Implies[Or[P, Q], Bottom]) -> And[Implies[P, Bottom], Implies[Q, Bottom]]:
+def de_morgan_1a(hnpq: Not[Or[P, Q]]) -> And[Not[P], Not[Q]]:
     return And(
-        Implies(lambda hp: hnpq.apply(Or.intro_left(hp))),
-        Implies(lambda hq: hnpq.apply(Or.intro_right(hq)))
+        Not(lambda hp: hnpq.apply(Or.intro_left(hp))),
+        Not(lambda hq: hnpq.apply(Or.intro_right(hq)))
     )
 
 
@@ -149,7 +149,7 @@ def de_morgan_2(hnpnq: Or[Not[P], Not[Q]]) -> Not[And[P, Q]]:
 
 
 # ¬(P ∧ ¬P)
-def not_pos_and_neg()-> Not[And[P, Not[P]]]:
+def not_pos_and_neg() -> Not[And[P, Not[P]]]:
     return Not(lambda hpnp:
         hpnp.right.apply(hpnp.left)
     )
