@@ -47,6 +47,12 @@ class Implies(Generic[S, T]):
         self.apply = mapping
 
 
+class Iff(Generic[S, T]):
+    def __init__(self, forward: Implies[S, T], backward: Implies[T, S]):
+        self.forward = forward
+        self.backward = backward
+
+
 # ⊥
 class Bottom:
     def eliminate(self) -> Any:
@@ -248,6 +254,25 @@ def never_bottom(hpb: Or[P, Bottom]) -> P:
 # ⊥ → P ∧ ⊥
 def add_assumption_to_bottom(bottom: Bottom) -> And[P, Bottom]:
     return And(bottom.eliminate(), bottom)
+
+
+# ¬(P ↔︎ ¬P)
+def not_pos_iff_neg() -> Not[Iff[P, Not[P]]]:
+    return Not(
+        lambda hpnp: hpnp.forward
+        .apply(hpnp.backward
+            .apply(Not(lambda hp: hpnp.forward
+                .apply(hp)
+                .apply(hp)
+            ))
+        )
+        .apply(hpnp.backward
+            .apply(Not(lambda hp: hpnp.forward
+                .apply(hp)
+                .apply(hp)
+            ))
+        )
+    )
 
 
 # (P → Q) → (¬Q → ¬P)

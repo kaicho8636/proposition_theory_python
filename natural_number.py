@@ -1,3 +1,4 @@
+from ast import Sub
 from typing import TypeVar, Generic
 
 S = TypeVar('S')
@@ -11,7 +12,8 @@ class Refl(Generic[S, T]):
 
 
 class Nat:
-    pass
+    def __add__(self, other):
+        return Add(self, other)
 
 
 M = TypeVar('M', bound=Nat)
@@ -27,8 +29,22 @@ class Cons(Nat, Generic[N]):
         self.prev = prev
 
 
-def h0(assumption: Refl[Cons[M], N]) -> Refl[Cons[Cons[M]], Cons[N]]:  # m+1=n → m+2=n+1
-    return Refl(
-        Cons(assumption.left),
-        Cons(assumption.right)
-    )
+class Add:
+    def __init__(self, m: Nat, n: Nat):
+        self.m = m
+        self.n = n
+
+
+X = TypeVar('X', bound=Nat)
+Y = TypeVar('Y', bound=Nat)
+Z = TypeVar('Z', bound=)
+
+
+test = Add(Cons(Zero()), Zero())
+
+# m+n = n+m
+add_commutative: Refl[Add[X, Y], Add[Y, X]] = Refl(
+    Add(Zero(), Zero()),
+    Add(Cons(Zero()), Zero())
+)
+    
