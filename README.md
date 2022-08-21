@@ -8,4 +8,13 @@ Install [Pyright](https://github.com/microsoft/pyright) and run type check on pr
 ```console
 $ pip install pyright
 $ pyright proposition.py
+No configuration file found.
+No pyproject.toml file found.
+stubPath /Users/kaicho8636/Projects/provingPython/typings is not a valid directory.
+Assuming Python platform Darwin
+Searching for source files
+Found 1 source file
+pyright 1.1.267
+0 errors, 0 warnings, 0 informations 
+Completed in 0.97sec
 ```
