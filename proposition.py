@@ -1,4 +1,5 @@
-from typing import TypeVar, Generic
+from tkinter.messagebox import NO
+from typing import Any, TypeVar, Generic
 from collections.abc import Callable
 from abc import ABCMeta, abstractmethod
 S = TypeVar('S')
@@ -36,13 +37,15 @@ class And(Generic[S, T]):
 
 class Implies(Generic[S, T]):
     def __init__(self, mapping: Callable[[S], T]):
-        self.mapping = mapping
-    
-    def apply(self, domain: S) -> T:
-        return self.mapping(domain)
+        self.apply = mapping
 
 
 class Bottom:
+    def eliminate(self) -> Any:
+        return
+
+
+class Not(Implies[S, Bottom], Generic[S]):
     pass
 
 
@@ -146,13 +149,14 @@ def destruct_and(hpqr: Implies[And[P, Q], R]) -> Implies[P, Implies[Q, R]]: # (p
 
 
 def destruct_or(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]:
+    # (P ∨ Q → R) → (P → R) ∧ (Q → R)
     return And(
         Implies(lambda hp: hpqr.apply(Left(hp))),
         Implies(lambda hq: hpqr.apply(Right(hq)))
     )
 
 
-def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
+def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]: # (P → R) ∧ (Q → R) → (P ∨ Q → R)
     return Implies(
         lambda hpq: hpq.eliminate(
             lambda hp: hprqr.left.apply(hp),
@@ -162,14 +166,16 @@ def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
 
 
 def de_morgan_1a(hnpq: Implies[Or[P, Q], Bottom]) -> And[Implies[P, Bottom], Implies[Q, Bottom]]:
+    # ¬(P ∨ Q) → ¬P ∧ ¬Q
     return And(
         Implies(lambda hp: hnpq.apply(Left(hp))),
         Implies(lambda hq: hnpq.apply(Right(hq)))
     )
 
 
-def de_morgan_1b(hnpnq: And[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[Or[P, Q], Bottom]:
-    return Implies(
+def de_morgan_1b(hnpnq: And[Not[P], Not[Q]]) -> Not[Or[P, Q]]:
+    # ¬P ∧ ¬Q → ¬(P ∨ Q)
+    return Not(
         lambda hpq: hpq.eliminate(
             lambda hp: hnpnq.left.apply(hp),
             lambda hq: hnpnq.right.apply(hq)
@@ -177,8 +183,50 @@ def de_morgan_1b(hnpnq: And[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[
     )
 
 
-def de_morgan_2(hnpnq: Or[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[And[P, Q], Bottom]:
+def de_morgan_2(hnpnq: Or[Not[P], Not[Q]]) -> Not[And[P, Q]]:
+    # ¬P ∨ ¬Q → ¬(P ∧ Q)
     return hnpnq.eliminate(
-        lambda hnp: Implies(lambda hpq: hnp.apply(hpq.left)),
-        lambda hnq: Implies(lambda hpq: hnq.apply(hpq.right))
+        lambda hnp: Not(lambda hpq: hnp.apply(hpq.left)),
+        lambda hnq: Not(lambda hpq: hnq.apply(hpq.right))
+    )
+
+
+# ¬(P ∧ ¬P)
+not_contradiction: Not[And[P, Not[P]]] = Not(
+    lambda hpnp: hpnp.right.apply(hpnp.left)
+)
+
+
+def derive_neg_impl(hpnq: And[P, Not[Q]]) -> Not[Implies[P, Q]]:  # P ∧ ¬Q → ¬(P → Q)
+    return Not(
+        lambda hpq: hpnq.right.apply(
+            hpq.apply(hpnq.left)
+        )
+    )
+
+
+def elim_bottom(hnp: Not[P]) -> Implies[P, Q]:  # ¬P → (P → Q)
+    return Implies(lambda hp: hnp.apply(hp).eliminate())
+
+
+def derive_impl(hnpq: And[Not[P], Q]) -> Implies[P, Q]:  # ¬P ∧ Q → (P → Q)
+    return Implies(lambda hp: hnpq.left.apply(hp).eliminate())
+
+
+def never_bottom(hpb: Or[P, Bottom]) -> P:  # P ∨ ⊥ → P
+    return hpb.eliminate(
+        lambda hp: hp,
+        lambda bottom: bottom.eliminate()
+    )
+
+
+def add_assumption_to_bottom(bottom: Bottom) -> And[P, Bottom]: # ⊥ → P ∧ ⊥
+    return And(bottom.eliminate(), bottom)
+
+
+def contraposition(hpq: Implies[P, Q]) -> Implies[Not[Q], Not[P]]: # (P → Q) → (¬Q → ¬P)
+    return Implies(
+        lambda hnq: Not(
+            lambda hp: hnq.apply(hpq.apply(hp))
+        )
     )
