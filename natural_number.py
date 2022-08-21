@@ -1,16 +1,17 @@
 from typing import TypeVar, Generic
+
 S = TypeVar('S')
 T = TypeVar('T')
 
 
 class Refl(Generic[S, T]):
-  def __init__(self, left: S, right: T):
-    self.left = left
-    self.right = right
+    def __init__(self, left: S, right: T):
+        self.left = left
+        self.right = right
 
 
 class Nat:
-  pass
+    pass
 
 
 M = TypeVar('M', bound=Nat)
@@ -18,16 +19,16 @@ N = TypeVar('N', bound=Nat)
 
 
 class Zero(Nat):
-  pass
+    pass
 
 
 class Cons(Nat, Generic[N]):
-  def __init__(self, prev: N):
-    self.prev = prev
+    def __init__(self, prev: N):
+        self.prev = prev
 
 
-def h0(assumption: Refl[Cons[M], N]) -> Refl[Cons[Cons[M]], Cons[N]]: # m+1=n → m+2=n+1
-  return Refl(
-    Cons(assumption.left),
-    Cons(assumption.right)
-  )
+def h0(assumption: Refl[Cons[M], N]) -> Refl[Cons[Cons[M]], Cons[N]]:  # m+1=n → m+2=n+1
+    return Refl(
+        Cons(assumption.left),
+        Cons(assumption.right)
+    )
