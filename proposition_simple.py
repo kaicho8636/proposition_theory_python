@@ -1,10 +1,11 @@
 # These theorems are from https://leanprover.github.io/theorem_proving_in_lean4/propositions_and_proofs.html#examples-of-propositional-validities
-from typing import Callable, Union, Tuple
+from typing import Callable, TypeAlias, Union, Tuple, Any
 
 
 Or = Union
 And = Tuple
 Implies = Callable
+Bottom: TypeAlias = Any
 
 
 # P Q R: Proposition
@@ -78,3 +79,59 @@ def destruct_or(hpqr: Implies[[Or[P, Q]], R]) -> And[Implies[[P], R], Implies[[Q
 # (P → R) ∧ (Q → R) → (P ∨ Q → R)
 def unify_or(hprqr: And[Implies[[P], R], Implies[[Q], R]]) -> Implies[[Or[P, Q]], R]:
     return lambda hpq: hprqr[0](hpq) if isinstance(hpq, P) else hprqr[1](hpq)
+
+
+# ¬(P ∨ Q) → ¬P ∧ ¬Q
+def de_morgan_1a(hnpq: Implies[[Or[P, Q]], Bottom]) -> And[Implies[[P], Bottom], Implies[[Q], Bottom]]:
+    return (lambda hp: hnpq(hp), lambda hq: hnpq(hq))
+
+
+# ¬P ∧ ¬Q → ¬(P ∨ Q)
+def de_morgan_1b(hnpnq: And[Implies[[P], Bottom], Implies[[Q], Bottom]]) -> Implies[[Or[P, Q]], Bottom]:
+    return lambda hpq: hnpnq[0](hpq) if isinstance(hpq, P) else hnpnq[1](hpq)
+
+
+# ¬P ∨ ¬Q → ¬(P ∧ Q) (Type Checker doesn't work correctly)
+# def de_morgan_2(hnpnq: Or[Implies[[P], Bottom], Implies[[Q], Bottom]]) -> Implies[[And[P, Q]], Bottom]:
+#     return lambda hpq: hnpnq(hpq[0]) if isinstance(hnpnq, Implies[[P], Bottom]) else hnpnq(hpq[1])
+
+
+# ¬(P ∧ ¬P)
+def not_pos_and_neg() -> Implies[[And[P, Implies[[P], Bottom]]], Bottom]:
+    return lambda hpnp: hpnp[1](hpnp[0])
+
+
+# P ∧ ¬Q → ¬(P → Q)
+def derive_neg_impl(hpnq: And[P, Implies[[Q], Bottom]]) -> Implies[[Implies[[P], Q]], Bottom]:
+    return lambda hpq: hpnq[1](hpq(hpnq[0]))
+
+
+# ¬P → (P → Q)
+def elim_bottom(hnp: Implies[[P], Any]) -> Implies[[P], Q]:
+    return lambda hp: hnp(hp)
+
+
+# ¬P ∧ Q → (P → Q)
+def derive_impl(hnpq: And[Implies[[P], Bottom], Q]) -> Implies[[P], Q]:
+    return lambda hp: hnpq[0](hp)
+
+
+# P ∨ ⊥ → P
+def never_bottom(hpb: Or[P, Bottom]) -> P:
+    return hpb
+
+
+# ⊥ → P ∧ ⊥
+def add_assumption_to_bottom(bottom: Bottom) -> And[P, Bottom]:
+    return bottom
+
+
+# ¬(P ↔︎ ¬P)
+def not_pos_iff_neg() -> Implies[[And[Implies[[P], Implies[[P], Bottom]], Implies[[Implies[[P], Bottom]], P]]], Bottom]:
+    lemma: Implies[[And[Implies[[P], Implies[[P], Bottom]], Implies[[Implies[[P], Bottom]], P]]], P] = lambda hpnp: hpnp[1](lambda hp: hpnp[0](hp)(hp))
+    return lambda hpnp: hpnp[0](lemma(hpnp))(lemma(hpnp))
+
+
+# (P → Q) → (¬Q → ¬P)
+def contraposition(hpq: Implies[[P], Q]) -> Implies[[Implies[[Q], Bottom]], Implies[[P], Bottom]]:
+    return lambda hnq: lambda hp: hnq(hpq(hp))
