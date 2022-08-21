@@ -1,5 +1,5 @@
 # provingPython(wip)
-Definitions, theorems and proofs written in Python. You can verify these proofs with [Pyright](https://github.com/microsoft/pyright).
+Definitions, theorems and proofs written in Python. You can verify these proofs with [Pyright](https://github.com/microsoft/pyright). Please note that you cannot use mypy as it passes invalid proofs.
 ## Usage
 ### Visual Studio Code
 Install [Pylance plugin](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) and set type checking mode to "basic" at Settings > Python > Type Cheking Mode. Then, open proof files and if you don't see any type error, proofs are correct.
