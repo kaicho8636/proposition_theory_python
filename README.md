@@ -1,4 +1,4 @@
-# provingPython
+# provingPython(wip)
 Definitions, theorems and proofs written in Python. You can verify these proof with [Pyright](https://github.com/microsoft/pyright).
 ## Usage
 ### Visual Studio Code
