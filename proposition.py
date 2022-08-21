@@ -161,17 +161,24 @@ def unify_or(hprqr: And[Implies[P, R], Implies[Q, R]]) -> Implies[Or[P, Q], R]:
     )
 
 
-def de_morgan_1a(hpqr: Implies[Or[P, Q], R]) -> And[Implies[P, R], Implies[Q, R]]:
+def de_morgan_1a(hnpq: Implies[Or[P, Q], Bottom]) -> And[Implies[P, Bottom], Implies[Q, Bottom]]:
     return And(
-        Implies(lambda hp: hpqr.apply(Left(hp))),
-        Implies(lambda hq: hpqr.apply(Right(hq)))
+        Implies(lambda hp: hnpq.apply(Left(hp))),
+        Implies(lambda hq: hnpq.apply(Right(hq)))
     )
 
 
-def de_morgan_1b(hprqr: And[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[Or[P, Q], Bottom]:
+def de_morgan_1b(hnpnq: And[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[Or[P, Q], Bottom]:
     return Implies(
         lambda hpq: hpq.eliminate(
-            lambda hp: hprqr.left.apply(hp),
-            lambda hq: hprqr.right.apply(hq)
+            lambda hp: hnpnq.left.apply(hp),
+            lambda hq: hnpnq.right.apply(hq)
         )
+    )
+
+
+def de_morgan_2(hnpnq: Or[Implies[P, Bottom], Implies[Q, Bottom]]) -> Implies[And[P, Q], Bottom]:
+    return hnpnq.eliminate(
+        lambda hnp: Implies(lambda hpq: hnp.apply(hpq.left)),
+        lambda hnq: Implies(lambda hpq: hnq.apply(hpq.right))
     )
