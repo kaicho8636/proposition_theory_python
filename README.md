@@ -7,7 +7,7 @@ Install [Pylance plugin](https://marketplace.visualstudio.com/items?itemName=ms-
 Install [Pyright](https://github.com/microsoft/pyright) and run type check on proof files.
 ```console
 $ pip install pyright
-$ pyright proposition.py
+$ pyright proposition_theorems.py
 No configuration file found.
 No pyproject.toml file found.
 stubPath /Users/kaicho8636/Projects/provingPython/typings is not a valid directory.
