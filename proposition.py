@@ -63,7 +63,11 @@ class Iff(Generic[S, T]):
 
 
 # ⊥
-class Bottom:
+class Bottom(metaclass=ABCMeta):
+    @abstractmethod
+    def __init__(self):
+        ...
+
     def eliminate(self) -> Any:
         return
 
