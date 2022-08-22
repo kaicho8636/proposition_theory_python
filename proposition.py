@@ -55,6 +55,7 @@ class Implies(Generic[S, T]):
         self.apply = mapping
 
 
+# S ↔︎ T
 class Iff(Generic[S, T]):
     def __init__(self, forward: Implies[S, T], backward: Implies[T, S]):
         self.forward = forward
