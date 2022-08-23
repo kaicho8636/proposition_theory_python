@@ -1,17 +1,17 @@
 # These theorems are from https://leanprover.github.io/theorem_proving_in_lean4/propositions_and_proofs.html#examples-of-propositional-validities
-from proposition import Or, And, Implies, Iff, Bottom, Not
+from proposition import Or, And, Implies, Iff, Bottom, Not, Proposition
 
 
 # P Q R: Proposition
-class P:
+class P(Proposition):
     pass
 
 
-class Q:
+class Q(Proposition):
     pass
 
 
-class R:
+class R(Proposition):
     pass
 
 
