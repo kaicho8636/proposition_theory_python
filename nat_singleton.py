@@ -2,6 +2,12 @@ from typing import Generic, TypeVar
 from abc import ABCMeta, abstractmethod
 from typing_extensions import Self
 
+from proposition import Proposition
+
+
+class Reflexivity(Proposition):
+    pass
+
 
 class Nat(metaclass=ABCMeta):
     @abstractmethod
@@ -45,5 +51,5 @@ def to_nat(integer: int) -> Nat:
 
 if __name__ == '__main__':
     print(f"Succ(Succ(Succ(Zero()))).to_int() = {Succ(Succ(Succ(Zero()))).to_int()}")
-    print(f"type(to_nat(5)) = {type(to_nat(5))}")
-    print(f"to_nat(5).to_int() = {to_nat(5).to_int()}")
+    print(f"to_nat(5).to_int() = {type(to_nat(5))}")
+    print(f"(to_nat(5) + to_nat(3)).to_int() = {(to_nat(5) + to_nat(3)).to_int()}")

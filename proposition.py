@@ -3,14 +3,18 @@ from collections.abc import Callable
 from abc import ABCMeta, abstractmethod
 
 
+class Proposition:
+    pass
+
+
 # ∀ S T U
-S = TypeVar('S')
-T = TypeVar('T')
-U = TypeVar('U')
+S = TypeVar('S', bound=Proposition)
+T = TypeVar('T', bound=Proposition)
+U = TypeVar('U', bound=Proposition)
 
 
 # S ∨ T
-class Or(Generic[S, T], metaclass=ABCMeta):
+class Or(Proposition, Generic[S, T], metaclass=ABCMeta):
     @abstractmethod
     def eliminate(self, left_case: Callable[[S], U], right_case: Callable[[T], U]) -> U:
         ...
@@ -43,27 +47,27 @@ class Right(Or[S, T]):
 
 
 # S ∧ T
-class And(Generic[S, T]):
+class And(Proposition, Generic[S, T]):
     def __init__(self, left: S, right: T):
         self.left = left
         self.right = right
 
 
 # S → T
-class Implies(Generic[S, T]):
+class Implies(Proposition, Generic[S, T]):
     def __init__(self, mapping: Callable[[S], T]):
         self.apply = mapping
 
 
 # S ↔︎ T
-class Iff(Generic[S, T]):
+class Iff(Proposition, Generic[S, T]):
     def __init__(self, forward: Implies[S, T], backward: Implies[T, S]):
         self.forward = forward
         self.backward = backward
 
 
 # ⊥
-class Bottom(metaclass=ABCMeta):
+class Bottom(Proposition, metaclass=ABCMeta):
     @abstractmethod
     def __init__(self):
         ...
