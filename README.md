@@ -1,4 +1,4 @@
-# provingPython(wip)
+# provingPython
 Mathematical/logical definitions, theorems and proofs written in Python. You can verify these proofs with [Pyright](https://github.com/microsoft/pyright). Please note that you cannot use mypy as it passes invalid proofs.
 ## Usage
 ### Visual Studio Code
